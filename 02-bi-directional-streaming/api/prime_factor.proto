@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "prime/api";
+package prime;
+
+service Factors {
+  // The stream keyword is specified before both the request type and response
+  // type to make it as bidirectional streaming RPC method.
+  rpc CalculatePrimeFactors (stream CalculatePrimeFactorsRequest) returns (stream CalculatePrimeFactorsResponse) {}
+}
+
+message CalculatePrimeFactorsRequest {
+  int64 num = 1;
+}
+
+message CalculatePrimeFactorsResponse {
+  int64 result = 1;
+}
