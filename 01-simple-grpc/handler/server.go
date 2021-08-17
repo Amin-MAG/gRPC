@@ -6,7 +6,7 @@ import (
 )
 
 type TestServer struct {
-	grpc.Server
+	*grpc.Server
 	apis.UnimplementedMajorityServer
 }
 
@@ -17,6 +17,6 @@ func NewTestServer() *TestServer {
 	apis.RegisterMajorityServer(s, &TestServer{})
 
 	return &TestServer{
-		Server: *s,
+		Server: s,
 	}
 }
