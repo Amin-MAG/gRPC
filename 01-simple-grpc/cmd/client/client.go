@@ -27,8 +27,11 @@ func main() {
 	defer cancel()
 
 	r, err := c.CalculateListMajority(ctx, &apis.ListMajorityRequest{Numbers: []int32{
-		0, 0, 0, 1, 1, 1,
+		0, 0, 1, 1, 1, 1,
 	}})
+	if err != nil {
+		log.Println(err.Error())
+	}
 
 	if r != nil {
 		log.Printf("%s", r.GetMessage())
