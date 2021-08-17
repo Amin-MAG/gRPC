@@ -15,4 +15,5 @@ message CalculatePrimeFactorsRequest {
 
 message CalculatePrimeFactorsResponse {
   int64 result = 1;
+  bool done = 2;
 }
