@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "echo/api";
+package echo;
+
+service Echo {
+  rpc GlobalCounter(CounterParam) returns (stream GlobalCounterResponse) {}
+  //  rpc GlobalRadio(stream CalculatePrimeFactorsRequest) returns (stream CalculatePrimeFactorsResponse) {}
+}
+
+message CounterParam {}
+
+message GlobalCounterResponse {
+  int64 counter = 1;
+}
