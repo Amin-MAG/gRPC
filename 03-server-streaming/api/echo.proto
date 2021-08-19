@@ -11,11 +11,17 @@ package echo;
 
 service Echo {
   rpc GlobalCounter(CounterParam) returns (stream GlobalCounterResponse) {}
-  //  rpc GlobalRadio(stream CalculatePrimeFactorsRequest) returns (stream CalculatePrimeFactorsResponse) {}
+  rpc GlobalRadio(RadioParams) returns (stream GlobalRadioResponse) {}
 }
 
 message CounterParam {}
+message RadioParams {}
 
 message GlobalCounterResponse {
   int64 counter = 1;
+}
+
+message GlobalRadioResponse {
+  int64 chunkIndex = 1;
+  bytes musicBytes = 2;
 }

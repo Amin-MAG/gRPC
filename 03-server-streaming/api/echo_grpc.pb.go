@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EchoClient interface {
 	GlobalCounter(ctx context.Context, in *CounterParam, opts ...grpc.CallOption) (Echo_GlobalCounterClient, error)
+	GlobalRadio(ctx context.Context, in *RadioParams, opts ...grpc.CallOption) (Echo_GlobalRadioClient, error)
 }
 
 type echoClient struct {
@@ -61,11 +62,44 @@ func (x *echoGlobalCounterClient) Recv() (*GlobalCounterResponse, error) {
 	return m, nil
 }
 
+func (c *echoClient) GlobalRadio(ctx context.Context, in *RadioParams, opts ...grpc.CallOption) (Echo_GlobalRadioClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Echo_ServiceDesc.Streams[1], "/echo.Echo/GlobalRadio", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &echoGlobalRadioClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Echo_GlobalRadioClient interface {
+	Recv() (*GlobalRadioResponse, error)
+	grpc.ClientStream
+}
+
+type echoGlobalRadioClient struct {
+	grpc.ClientStream
+}
+
+func (x *echoGlobalRadioClient) Recv() (*GlobalRadioResponse, error) {
+	m := new(GlobalRadioResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // EchoServer is the server API for Echo service.
 // All implementations must embed UnimplementedEchoServer
 // for forward compatibility
 type EchoServer interface {
 	GlobalCounter(*CounterParam, Echo_GlobalCounterServer) error
+	GlobalRadio(*RadioParams, Echo_GlobalRadioServer) error
 	mustEmbedUnimplementedEchoServer()
 }
 
@@ -75,6 +109,9 @@ type UnimplementedEchoServer struct {
 
 func (UnimplementedEchoServer) GlobalCounter(*CounterParam, Echo_GlobalCounterServer) error {
 	return status.Errorf(codes.Unimplemented, "method GlobalCounter not implemented")
+}
+func (UnimplementedEchoServer) GlobalRadio(*RadioParams, Echo_GlobalRadioServer) error {
+	return status.Errorf(codes.Unimplemented, "method GlobalRadio not implemented")
 }
 func (UnimplementedEchoServer) mustEmbedUnimplementedEchoServer() {}
 
@@ -110,6 +147,27 @@ func (x *echoGlobalCounterServer) Send(m *GlobalCounterResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Echo_GlobalRadio_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RadioParams)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(EchoServer).GlobalRadio(m, &echoGlobalRadioServer{stream})
+}
+
+type Echo_GlobalRadioServer interface {
+	Send(*GlobalRadioResponse) error
+	grpc.ServerStream
+}
+
+type echoGlobalRadioServer struct {
+	grpc.ServerStream
+}
+
+func (x *echoGlobalRadioServer) Send(m *GlobalRadioResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Echo_ServiceDesc is the grpc.ServiceDesc for Echo service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -121,6 +179,11 @@ var Echo_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "GlobalCounter",
 			Handler:       _Echo_GlobalCounter_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GlobalRadio",
+			Handler:       _Echo_GlobalRadio_Handler,
 			ServerStreams: true,
 		},
 	},

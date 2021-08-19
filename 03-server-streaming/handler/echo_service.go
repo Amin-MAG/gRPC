@@ -2,6 +2,7 @@ package handler
 
 import (
 	"echo/api"
+	"echo/player"
 	"google.golang.org/grpc"
 	"log"
 	"time"
@@ -15,15 +16,35 @@ type echoService struct {
 var globalCounter int64 = 0
 
 func NewEchoService(s *grpc.Server) *echoService {
-	go count()
+	//go count()
 
 	return &echoService{
 		Server: s,
 	}
 }
 
+func (ps *echoService) GlobalRadio(cp *api.RadioParams, stream api.Echo_GlobalRadioServer) error {
+	log.Println("Entering Global Radio")
+	for {
+		// Get bytes from file
+		data, err := player.GetTestFileChunks()
+		if err != nil {
+			return err
+		}
+
+		for i := 0; i < len(data); i++ {
+			err = stream.Send(&data[i])
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
 func (ps *echoService) GlobalCounter(cp *api.CounterParam, stream api.Echo_GlobalCounterServer) error {
-	log.Println("Entering Echo Player")
+	log.Println("Entering Global Counter")
 	for {
 		time.Sleep(250 * time.Millisecond)
 		resp := &api.GlobalCounterResponse{

@@ -24,6 +24,30 @@ func main() {
 
 	// Setup the stream
 	c := api.NewEchoClient(conn)
+	stream, err := c.GlobalRadio(context.Background(), &api.RadioParams{})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for {
+		data, err := stream.Recv()
+		if err == io.EOF {
+			fmt.Println("closing the stream from client")
+			break
+		}
+		if err != nil {
+			fmt.Println("failed to receive a data:", err)
+		}
+
+		fmt.Println("data received:", data.MusicBytes)
+	}
+
+	_ = stream.CloseSend()
+	time.Sleep(2 * time.Second)
+}
+
+func RunClientGlobalCounter(c api.EchoClient) {
+	// Setup the stream
 	stream, err := c.GlobalCounter(context.Background(), &api.CounterParam{})
 	if err != nil {
 		log.Fatalln(err)
@@ -42,7 +66,4 @@ func main() {
 
 		fmt.Println("Counter is showing", in.Counter)
 	}
-
-	_ = stream.CloseSend()
-	time.Sleep(2 * time.Second)
 }
